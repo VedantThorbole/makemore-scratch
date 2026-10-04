@@ -1,44 +1,37 @@
 # Makemore Scratch
 
-A character-level language model implemented from scratch using PyTorch.
+Character-level language models implemented from scratch using PyTorch.
 
 Inspired by Andrej Karpathy's makemore series.
 
-Implementation written from scratch for learning purposes.
+Implementation written independently for learning and experimentation.
 
 ---
 
 ## Project Overview
 
-This project implements a **Bigram Character-Level Language Model**.
+This repository explores the foundations of language modeling by building bigram models step-by-step.
 
-A bigram model learns the probability of the next character based on the current character.
+It contains two approaches:
 
-The model learns:
+1. Count-based Bigram Language Model
+2. Neural Network Bigram Language Model
+
+Both models learn:
 
 P(next_character | current_character)
 
-For example:
-
-Given the character:
-
-a
-
-The model learns the probability of possible next characters:
-
-a → b  
-a → n  
-a → r  
-
-Using these probabilities, the model can generate new names.
+The goal is to understand how modern language models begin from simple probability models and gradually evolve into neural networks.
 
 ---
 
-## Dataset
+# Model 1: Count-Based Bigram Model
 
-The model is trained on a dataset of names.
+The first model uses statistics from the dataset to estimate character transition probabilities.
 
-Each name is treated as a sequence of characters.
+## How It Works
+
+The dataset contains names.
 
 Example:
 
@@ -48,120 +41,98 @@ is converted into:
 
 . e m m a .
 
-The `.` character represents the start and end token.
+The `.` token represents the start and end of a name.
 
-The model learns character transitions:
-
-. → e  
-e → m  
-m → m  
-m → a  
-a → .
-
----
-
-## How It Works
-
-### 1. Character Vocabulary
-
-All unique characters from the dataset are converted into numerical IDs.
+The model counts how often one character appears after another.
 
 Example:
 
-a → 1  
-b → 2  
-c → 3  
-. → 0  
+e → m happened many times  
+m → a happened many times  
 
-This allows characters to be represented mathematically.
+These counts are stored in a 27 × 27 matrix.
 
----
+The count matrix is converted into probabilities:
 
-### 2. Building Bigram Counts
+P(next_character | current_character)
 
-A 27 × 27 matrix is created.
-
-Each cell stores how many times one character follows another.
-
-Example:
-
-If:
-
-a → b happened 10 times  
-a → c happened 5 times  
-a → d happened 15 times  
-
-The matrix stores these transition frequencies.
+The model then generates new names by sampling from these learned probabilities.
 
 ---
 
-### 3. Converting Counts Into Probabilities
+# Model 2: Neural Network Bigram Model
 
-The count matrix is normalized row-wise.
+The second model replaces the manually counted probability table with learnable parameters.
 
-Example:
+Instead of storing probabilities directly, the model learns a weight matrix using gradient descent.
 
-Before normalization:
+Architecture:
 
-a → b = 10  
-a → c = 5  
-a → d = 15  
+Input character
 
-After normalization:
+↓
 
-P(b|a) = 0.33  
-P(c|a) = 0.16  
-P(d|a) = 0.50  
+One-hot encoding
 
-Each row now represents a probability distribution for the next character.
+↓
 
----
+Linear layer (W)
 
-### 4. Generating Names
+↓
 
-The model starts from the start token:
+Logits
 
-.
+↓
 
-It samples the next character based on learned probabilities.
+Softmax
 
-Example:
+↓
 
-. → m → a → r → i → .
+Next character probabilities
 
-The generated sequence becomes a new name.
+The model learns the relationship between characters by adjusting the weights during training.
 
 ---
 
-## Loss Function
+## Training Process
 
-The model is evaluated using:
+The neural network is trained using:
 
-Negative Log Likelihood (NLL)
+### Negative Log Likelihood Loss (NLL)
 
-The goal is to maximize the probability assigned to real character sequences.
+The objective is to maximize the probability assigned to the correct next character.
 
-A lower NLL means the model assigns better probabilities to real data.
+The training loop:
 
-Formula:
+1. Forward pass
+2. Calculate probabilities
+3. Compute loss
+4. Backpropagation
+5. Update weights using gradient descent
 
-Loss = -log(probability of correct next character)
+The update rule:
+
+weights = weights - learning_rate × gradient
 
 ---
 
 ## Concepts Learned
 
+Through this project:
+
 - Character tokenization
 - Vocabulary creation
-- String processing
-- Dictionary mappings
+- Character-to-index mapping
 - Bigram statistics
 - Probability distributions
-- Sampling from probability distributions
-- PyTorch tensors
-- Random generators
+- One-hot encoding
+- Matrix multiplication
+- Logits
+- Softmax
 - Negative Log Likelihood loss
-- Basics of language modeling
+- Gradient descent
+- Backpropagation using PyTorch autograd
+- Neural network based language modeling
 
 ---
 
@@ -169,11 +140,9 @@ Loss = -log(probability of correct next character)
 
 makemore-scratch/
 
-makemore-scratch/
-
-├── bigram_model.py
-├── names.txt
-├── README.md
+├── bigram_models.py  
+├── names.txt  
+├── README.md  
 └── requirements.txt  
 
 ---
@@ -198,9 +167,20 @@ pip install -r requirements.txt
 
 Run:
 
-python bigram_model.py
+python bigram_models.py
 
-Example output:
+The script will:
+
+- Generate names using the count-based model
+- Calculate count model NLL
+- Train the neural network bigram model
+- Generate names using the neural network
+
+---
+
+## Example Output
+
+Count Model:
 
 Generated names:
 
@@ -208,14 +188,15 @@ maria.
 johan.  
 lena.
 
-The generated names will change depending on the random seed.
+Neural Network Model:
 
----
+Generated names:
 
-## Technologies Used
+mariel.  
+jovan.  
+lina.
 
-- Python
-- PyTorch
+(Generated output changes depending on random seed.)
 
 ---
 
@@ -225,7 +206,16 @@ This repository is part of my journey to understand modern AI systems from first
 
 The progression:
 
-Bigram Language Model
+Micrograd
+(backpropagation engine)
+
+↓
+
+Count-Based Bigram Model
+
+↓
+
+Neural Network Bigram Model
 
 ↓
 
@@ -233,11 +223,7 @@ MLP Character-Level Language Model
 
 ↓
 
-Backpropagation From Scratch
-
-↓
-
-Neural Networks
+Embeddings
 
 ↓
 
@@ -251,11 +237,11 @@ Large Language Models
 
 ## Future Improvements
 
-- Add neural network based language model
-- Implement embeddings
-- Implement backpropagation manually
-- Build an MLP language model
-- Implement a transformer architecture from scratch
+- Implement MLP language model
+- Add embeddings
+- Add hidden layers and non-linear activation functions
+- Implement batch normalization
+- Build a transformer architecture from scratch
 
 ---
 
